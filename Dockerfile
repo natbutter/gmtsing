@@ -24,7 +24,7 @@ RUN apt-get update -y && \
 	apt-get install libglew-dev python3-pip python3-dev libboost-dev libboost-thread-dev libboost-program-options-dev libboost-test-dev libboost-system-dev libqtgui4 libqt4-dev libgdal-dev libcgal-dev libproj-dev libqwt-dev libfreetype6-dev libfontconfig1-dev libxrender-dev libice-dev libsm-dev git wget -y
 	
 
-RUN apt-get install make libtiff4-dev libglu1-mesa-dev freeglut3-dev -y
+RUN apt-get install make libglu1-mesa-dev freeglut3-dev -y
 
 RUN wget https://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.3.tar.gz && \
 	tar -xzvf ./openmpi-1.10.3.tar.gz && \
@@ -43,47 +43,48 @@ RUN wget https://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.3.t
 #COPY environment.yml environment.yml
 #RUN /opt/conda/bin/conda env create -f environment.yml
 
-RUN pip install -U pip  # fixes AssertionError in Ubuntu pip
-RUN pip install enum34
-RUN LLVM_CONFIG=llvm-config-3.6 pip install llvmlite==0.8.0
-RUN pip install jupyter markupsafe zmq singledispatch backports_abc certifi jsonschema ipyparallel path.py matplotlib mpi4py==1.3.1 git+https://github.com/badlands-model/triangle pandas plotly
+RUN pip3 install -U pip  # fixes AssertionError in Ubuntu pip
+RUN pip3 install enum34
+#RUN LLVM_CONFIG=llvm-config-3.6 pip3 install llvmlite==0.8.0
+RUN pip3 install jupyter markupsafe zmq singledispatch backports_abc certifi jsonschema ipyparallel path.py matplotlib  pandas plotly
 RUN apt-get install -y libnetcdf-dev python-mpltoolkits.basemap
-RUN pip install Cython==0.20
-RUN pip install h5py
-RUN pip install scipy
-RUN pip install numpy
-RUN pip install numba==0.23.1 ez_setup
-RUN pip install gFlex
-RUN pip install netcdf4
-RUN pip install colorlover
-RUN pip install cmocean
-RUN pip install scikit-fuzzy
-RUN pip install pyevtk
+RUN pip3 install Cython==0.20
+RUN pip3 install h5py
+RUN pip3 install scipy
+RUN pip3 install numpy
+#RUN pip3 install numba
+RUN pip3 install gFlex
+#RUN pip3 install netcdf4
+RUN pip3 install colorlover
+RUN pip3 install cmocean
+RUN pip3 install scikit-fuzzy
+RUN pip3 install pyevtk
 
-RUN git clone https://github.com/intelligentEarth/Bayeslands_continental.git && \
-	cd Bayeslands_continental/pyBadlands/libUtils && \
-	make all
-
+RUN git clone https://github.com/intelligentEarth/Bayeslands_continental.git 
+RUN apt-get install -y gfortran 
+RUN cd /build/Bayeslands_continental/badlands/utils/ && make all
 #And actuall install Bayeslands to python
-RUN cd /build && pip install -e Bayeslands_continental/
+RUN cd /build/Bayeslands_continental/ && pip3 install -e badlands/ 
 
-RUN git clone https://github.com/phargogh/dbfpy3.git && \
-	pip install dbfpy3/
+RUN cd /build && \
+	git clone https://github.com/phargogh/dbfpy3.git && \
+	pip3 install dbfpy3/
 
+RUN pip3 install plotly chart-studio
+#Clean up Docker build and trim packages
 RUN rm -rf /var/lib/apt/lists/*
 
 #Set up GMT
 COPY version /etc/motd
 
 #Set up an empty working directory in the container
-WORKDIR /workspace
+WORKDIR /build/Bayeslands_continental
 CMD /bin/bash
 
 #Add everything to your path as needed
 
 ENV PATH /usr/local/mpi/bin:$PATH
-ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/mpi/lib:/workspace/Bayeslands-basin-continental/pyBadlands/libUtils
-ENV PYTHON_PATH $PYTHON_PATH:/workspace/Bayeslands-basin-continental/pyBadlands/libUtils
+ENV LD_LIBRARY_PATH $LD_LIBRARY_PATH:/usr/local/mpi/lib:/build/Bayeslands_continental/badlands/utils
+ENV PYTHON_PATH $PYTHON_PATH:/build/Bayeslands_continental/badlands/utils
 
 
-WORKDIR /workspace/Bayeslands-basin-continental
