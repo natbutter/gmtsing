@@ -1,50 +1,36 @@
-Bootstrap: docker
+#A singularity script to run the repo
+#https://github.com/intelligentEarth/Bayeslands_continental
+#Developed in the docker cotainer
 
-#MAINTAINER Nathaniel Butterworth at Sydney Informatics Hub
 #Build with:
-#sudo singularity build --writable gmtsing.simg singbayes.build
-#Run with:
-#singularity exec -e -B $PBS_O_WORKDIR:/workspace syn.simg /bin/bash -c "source /opt/conda/bin/activate pygmt && python"
+#sudo singularity build --writable gmtsing.img singbayes.build
 
-#singularity exec 
+#Typically run on a HPC environemnt with something like this:
 
-# Pull base image.
-From: ubuntu:16.04
+################
+#!/bin/bash
 
+# Directives sent to pbs, the job scheduler on Artemis
+#PBS -P BGH 
+#PBS -N mybadlandsrun 
+#PBS -l select=1:ncpus=10:mem=60gb
+#PBS -l walltime=200:00:00
+#PBS -q alloc-dm
+
+#cd $PBS_O_WORKDIR
+#cd /project/RDS-FSC-BGH-RW/danial/Bayeslands_continental
+
+#module load singularity
+#singularity exec gmtsing.img python3 ptBayeslands_revamp.py -p 2 -s 1000 -r 10 -t 2 -swap 2 -b 0.25 -pt 0.5 -epsilon 0.5 -rain_intervals 4
+#singularity exec gmtsing.img python3 visualise.py -p 2 -s 1000 -r 10 -t 2 -swap 2 -b 0.25 -pt 0.5 -epsilon 0.5 -rain_intervals 4
+###################
+
+Bootstrap: docker
+From: nbutter/gmtsing
+
+#Directories are mounted on Artemis and NCI, so we add them here to bind in at runtime.
+#Change these as required by your HPC cluster
 %post
 
-#Create folders for mounting on Artemis
-mkdir /project 
-mkdir /scratch 
-
-#Install ubuntu libraires and packages
-apt-get update -y
-
-apt-get update -qq && apt-get dist-upgrade -y && \
-    apt install vim gmt gmt-dcw gmt-gshhg netcdf-bin -y && \
-    echo "cat /etc/motd" >> /root/.bashrc
-
-apt-get update -y && \
-	apt-get install libglew-dev python-dev libboost-dev libboost-python-dev libboost-thread-dev libboost-program-options-dev libboost-test-dev libboost-system-dev libqtgui4 libqt4-dev libgdal-dev libcgal-dev libproj-dev libqwt-dev libfreetype6-dev libfontconfig1-dev libxrender-dev libice-dev libsm-dev wget git -y 
-
-#Download conda python because I like it
-wget -O ~/miniconda.sh https://repo.continuum.io/miniconda/Miniconda3-4.7.10-Linux-x86_64.sh  && \
-     chmod +x ~/miniconda.sh && \
-     ~/miniconda.sh -b -p /opt/conda && \
-     rm ~/miniconda.sh 
-
-#Get a copy of the environment file and GMT install stuff
-git clone https://github.com/natbutter/gmtsing.git
-
-#Create the python environemnt called "pygmt"
-/opt/conda/bin/conda env create -f gmtsing/environment.yml
-
-#Copy the GMT version details
-cp gmtsing/version /etc/motd
-
-mkdir /workspace
-
 %runscript
-
-cd /workspace
-exec /bin/bash -c "source /opt/conda/bin/activate pygmt"
+exec /bin/bash
