@@ -1,7 +1,7 @@
 #docker build -t gmtsing .
 
 #To run this, with an interactive python temrinal, mounting your current host directory in the container directory at /workspace use:
-#sudo docker run -it --rm -v C:\WORK\Projects\:/workspace gmtsing /bin/bash -c "source /opt/conda/bin/activate pygmt
+#sudo docker run gmtsing python3 ptBayeslands_revamp.py -p 2 -s 1000 -r 10 -t 2 -swap 2 -b 0.25 -pt 0.5 -epsilon 0.5 -rain_intervals 4
 
 # Pull base image.
 FROM ubuntu:16.04
@@ -71,6 +71,9 @@ RUN cd /build && \
 	pip3 install dbfpy3/
 
 RUN pip3 install plotly chart-studio
+
+RUN apt-get install -y gdal-bin python-gdal python3-gdal
+
 #Clean up Docker build and trim packages
 RUN rm -rf /var/lib/apt/lists/*
 
