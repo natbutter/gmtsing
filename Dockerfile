@@ -81,7 +81,7 @@ RUN rm -rf /var/lib/apt/lists/*
 COPY version /etc/motd
 
 #Set up an empty working directory in the container
-WORKDIR /build/Bayeslands_continental
+WORKDIR /workspace
 CMD /bin/bash
 
 #Add everything to your path as needed
